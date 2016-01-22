@@ -2925,6 +2925,7 @@ POTE Compiler::ParseByteArray()
 			elemstemp = (BYTE*)realloc(elems, maxelemcount*sizeof(BYTE));
 			if (elemstemp != NULL) {
 				elems = elemstemp;
+				free(elemstemp);
 			}
 		}
 		
