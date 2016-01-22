@@ -418,6 +418,7 @@ void ObjectMemory::FixedSizePool::morePages()
 	const int nPages = dwAllocationGranularity / dwPageSize;
 	UNREFERENCED_PARAMETER(nPages);
 	ASSERT(dwPageSize*nPages == dwAllocationGranularity);
+	static void** m_pAllocationsTemp;
 
 	BYTE* pStart = static_cast<BYTE*>(::VirtualAlloc(NULL, dwAllocationGranularity, MEM_COMMIT, PAGE_READWRITE));
 	if (!pStart)
@@ -433,7 +434,13 @@ void ObjectMemory::FixedSizePool::morePages()
 	// Put the allocation (64k) into the allocation list so we can free it later
 	{
 		m_nAllocations++;
-		m_pAllocations = static_cast<void**>(realloc(m_pAllocations, m_nAllocations*sizeof(void*)));
+		//when realloc() fails in allocating memory, original pointer 'elems' is lost. 
+		// assigning realloc() to a temporary pointer.
+		m_pAllocationsTemp = static_cast<void**>(realloc(m_pAllocations, m_nAllocations*sizeof(void*)));
+		if (m_pAllocationsTemp != NULL) {
+			m_pAllocations = m_pAllocationsTemp;
+			free(m_pAllocationsTemp);
+		}
 		m_pAllocations[m_nAllocations-1] = pStart;
 	}
 
