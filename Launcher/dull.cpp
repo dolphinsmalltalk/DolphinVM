@@ -27,6 +27,7 @@ HRESULT __stdcall ErrorUnableToCreateVM(HRESULT hr)
 static const char* FindImageNameArg()
 {
 	LPCSTR szImage = "Dolphin.img7";
+	char editedImageName[_MAX_PATH];
 	static char achImageName[_MAX_PATH];
 
 	for (int i=1;i<__argc;i++)
@@ -34,7 +35,23 @@ static const char* FindImageNameArg()
 		char ch = *__argv[i];
 		if (ch != '/' && ch != '-')
 		{
-			szImage = __argv[i];
+			LPCSTR szSuffix = ".img7";
+			size_t suffixSize = strnlen(szSuffix, 10);
+			LPCSTR szArgument = __argv[i];
+			size_t pathLength = strnlen(szArgument, _MAX_PATH);
+			LPCSTR szArgumentSuffix = szArgument + pathLength - suffixSize;
+			if ((suffixSize < pathLength) && 
+				(pathLength < (MAX_PATH - suffixSize - 1)) && 
+				(0 != memcmp(szArgumentSuffix, szSuffix, suffixSize)))
+			{
+				memcpy(editedImageName, szArgument, pathLength);
+				memcpy(editedImageName + pathLength, szSuffix, suffixSize);
+				szImage = editedImageName;
+			}
+			else
+			{
+				szImage = __argv[i];
+			}
 			break;
 		}
 	}
