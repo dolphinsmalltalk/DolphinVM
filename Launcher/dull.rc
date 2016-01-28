@@ -124,6 +124,7 @@ BEGIN
                             "Unable to establish link between calling application and Dolphin image (Error %1!#d! unmarshalling application interface)"
     IDP_FAILTOSTARTTHREAD   "Failed to start Dolphin thread"
     IDP_UNRECOGNISEDIMAGEVERSION "Unrecognised image version %2!d!: %1"
+    IDP_NOIMAGENAME         "An image name (.img7) is required as an argument to the executable"
 END
 
 STRINGTABLE

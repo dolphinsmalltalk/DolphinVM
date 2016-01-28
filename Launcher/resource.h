@@ -7,6 +7,7 @@
 #define IDP_FAILEDTOUNMARSHALOUTER      6
 #define IDP_FAILTOSTARTTHREAD           7
 #define IDP_UNRECOGNISEDIMAGEVERSION    8
+#define IDP_NOIMAGENAME                 9
 
 // Next default values for new objects
 // 
