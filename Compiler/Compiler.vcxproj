@@ -109,6 +109,9 @@
       <ImportLibrary>.\Release/DolphinCR006.lib</ImportLibrary>
       <ProgramDatabaseFile />
     </Link>
+    <PreBuildEvent>
+      <Command>..\getVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='VM Debug|Win32'">
     <CustomBuildStep>
@@ -167,6 +170,9 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
+    <PreBuildEvent>
+      <Command>..\getVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="compiler.cpp" />

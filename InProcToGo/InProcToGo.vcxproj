@@ -112,6 +112,9 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile />
     </Link>
+    <PreBuildEvent>
+      <Command>..\getVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='VM Debug|Win32'">
     <CustomBuildStep>
@@ -173,6 +176,9 @@
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
     </Link>
+    <PreBuildEvent>
+      <Command>..\getVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\axhost.cpp" />

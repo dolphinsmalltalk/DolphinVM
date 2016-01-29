@@ -109,6 +109,9 @@
       <ShowProgress>LinkVerbose</ShowProgress>
       <ProgramDatabaseFile />
     </Link>
+    <PreBuildEvent>
+      <Command>..\getVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='VM Debug|Win32'">
     <CustomBuildStep>
@@ -168,6 +171,9 @@
       </IgnoreSpecificDefaultLibraries>
       <MapExports>true</MapExports>
     </Link>
+    <PreBuildEvent>
+      <Command>..\getVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\fatalerror.cpp">
@@ -212,6 +218,9 @@
       <Project>{241d4e3e-44c0-40b7-be1b-5249916fe631}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\getVersion.cmd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
