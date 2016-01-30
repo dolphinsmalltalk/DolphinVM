@@ -48,7 +48,8 @@ BEGIN
             VALUE "LegalCopyright", "Copyright © Object Arts 1997-2016. STS © David Gorisek 2000-2016"
             VALUE "OriginalFilename", "Dolphin7.exe"
             VALUE "ProductName", "Dolphin Smalltalk"
-            VALUE "ProductVersion", "2016.7.0.0"
+			VALUE "ProductVersion", GIT_TAG
+			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve macro unexpanded"
         END
     END
     BLOCK "VarFileInfo"

@@ -10,3 +10,9 @@
 #define IDP_VERSIONMISMATCH				1028
 #define IDS_VERSIONMISMATCH             1029
 #define IDR_IMAGE						100
+
+#if defined(_DEBUG)
+	#include "VersionDebug.h"
+#else
+	#include "Version.h"
+#endif
