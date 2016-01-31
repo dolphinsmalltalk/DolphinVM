@@ -8,7 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "winres.h"
-#include "..\rc_stub.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -48,8 +48,9 @@ BEGIN
             VALUE "LegalCopyright", "Copyright © Object Arts 1997-2016"
             VALUE "OriginalFilename", "DolphinCR7.DLL"
             VALUE "ProductName", "Dolphin Smalltalk 7"
+			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve GIT_TAG"
+#include "..\Version.h"
 			VALUE "ProductVersion", GIT_TAG
-			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve macro unexpanded"
 		END
     END
     BLOCK "VarFileInfo"
@@ -83,7 +84,7 @@ END
 2 TEXTINCLUDE 
 BEGIN
 	"#include ""winres.h""\r\n"
-	"#include ""..\\rc_stub.h""\0"
+	"\0"
 END
 
 3 TEXTINCLUDE 

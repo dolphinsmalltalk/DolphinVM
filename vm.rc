@@ -8,7 +8,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "winres.h"
-#include "rc_stub.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -162,8 +161,9 @@ BEGIN
             VALUE "OriginalFilename", "DolphinVM7.DLL"
             VALUE "PrivateBuild", "11192015"
             VALUE "ProductName", "Dolphin Smalltalk 7"
+			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve GIT_TAG"
+#include "Version.h"
 			VALUE "ProductVersion", GIT_TAG
-			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve macro unexpanded"
 			END
     END
     BLOCK "VarFileInfo"
