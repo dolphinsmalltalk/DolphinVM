@@ -9,6 +9,7 @@
 #include "resource.h"
 #include "..\rc_stub.h"
 #include "ImageFileMapping.h"
+#include <Pathcch.h>
 
 #if _MSC_FULL_VER >= 140040130
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df'\"")
@@ -26,21 +27,9 @@ HRESULT __stdcall ErrorUnableToCreateVM(HRESULT hr)
 
 static const char* FindImageNameArg()
 {
-	LPCSTR szImage = "DPRO.img7";
 	static char achImageName[_MAX_PATH];
-
-	for (int i=1;i<__argc;i++)
-	{
-		char ch = *__argv[i];
-		if (ch != '/' && ch != '-')
-		{
-			szImage = __argv[i];
-			break;
-		}
-	}
-
 	char* filePart;
-	::GetFullPathName(szImage, _MAX_PATH, achImageName, &filePart);
+	::GetFullPathName(__argv[1], _MAX_PATH, achImageName, &filePart);
 	return achImageName;
 }
 
@@ -97,8 +86,10 @@ static HRESULT StartOldImage(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPCST
 
 static HRESULT __stdcall StartDevSys(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPCSTR lpCmdLine, int nCmdShow)
 {
-	const char* szImageName = FindImageNameArg();
+	if (__argc < 2)
+		return ReportError(IDP_NOIMAGENAME);
 
+	const char* szImageName = FindImageNameArg();
 	ImageFileMapping imageFile;
 	int ret = imageFile.Open(szImageName);
 	if (ret < 0)
