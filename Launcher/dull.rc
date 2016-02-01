@@ -49,9 +49,9 @@ BEGIN
             VALUE "OriginalFilename", "Dolphin7.exe"
             VALUE "ProductName", "Dolphin Smalltalk"
 			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve GIT_TAG"
-#include "..\Version.h"
+#include "Version.h"
 			VALUE "ProductVersion", GIT_TAG
-			END
+		END
     END
     BLOCK "VarFileInfo"
     BEGIN

@@ -15,7 +15,6 @@ dlldata.c
 Messages.h
 Messages.rc
 UpgradeLog.htm
-Version.h
 *.tlb
 *.lst
 *.user
