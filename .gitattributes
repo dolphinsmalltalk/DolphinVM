@@ -2,3 +2,5 @@
 
 *.st  eol=crlf
 *.cls eol=crlf
+
+*.rc diff

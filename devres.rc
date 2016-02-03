@@ -390,8 +390,8 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""winres.h""\r\n"
-    "\0"
+	"#include ""winres.h""\r\n"
+	"\0"
 END
 
 3 TEXTINCLUDE 
@@ -446,8 +446,10 @@ BEGIN
             VALUE "LegalCopyright", "Copyright © Object Arts 1997-2016"
             VALUE "OriginalFilename", "DolphinDR7.dll"
             VALUE "ProductName", "Dolphin Smalltalk 7"
-            VALUE "ProductVersion", "2016.7.0.0"
-        END
+#include "Version.h"
+			VALUE "ProductVersion", GIT_TAG
+			VALUE "WARNING", "Please edit this as a text file rather than with the resource editor to preserve GIT_TAG"
+		END
     END
     BLOCK "VarFileInfo"
     BEGIN
