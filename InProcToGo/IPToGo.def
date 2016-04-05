@@ -47,10 +47,11 @@ uncompress
 	_eof
 	_errno
 	_errno
-	_fcvt
 	_fdopen
+	_finite
 	_filelength
 	_fileno
+	_fpclass
 	_gcvt
 	_getcwd
 	_i64toa
