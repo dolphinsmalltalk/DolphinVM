@@ -578,14 +578,10 @@ bool Compiler::ParseRepeatLoop(const int loopmark)
 	return true;
 }
 
-POTE Compiler::AddSymbolToFrame(const char* s, const TEXTRANGE& tokenRange, int* pLiteralIndex)
+POTE Compiler::AddSymbolToFrame(const char* s, const TEXTRANGE& tokenRange)
 {
 	POTE oteSelector = InternSymbol(s);
-	int literalIndex = AddToFrame(reinterpret_cast<Oop>(oteSelector), tokenRange);
-	if (pLiteralIndex != NULL)
-	{
-		*pLiteralIndex = literalIndex;
-	}
+	AddToFrame(reinterpret_cast<Oop>(oteSelector), tokenRange);
 	return oteSelector;
 }
 
