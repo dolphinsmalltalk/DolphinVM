@@ -623,7 +623,6 @@ inline void Compiler::GenPushStaticVariable(const Str& strName, const TEXTRANGE&
 		break;
 
 	case STATICVARIABLE:
-		//_ASSERTE(ObjectMemory::isKindOf(oteBinding, GetVMPointers().ClassVariableBinding));
 		GenStatic(oteStatic, range);
 		break;
 		
@@ -702,7 +701,6 @@ void Compiler::GenPushVariable(const Str& strName, const TEXTRANGE& range)
 void Compiler::GenInteger(int val, const TEXTRANGE& range)
 {
 	// Generates code to push a small integer constant.
-	//_ASSERTE(CanBeSmallInteger(val));
 	if (val >= -1 && val <= 2)
 		GenInstruction(ShortPushZero + val);
 	else if (val >= -128 && val <= 127)
@@ -1047,7 +1045,6 @@ int Compiler::GenMessage(const Str& pattern, int argCount, int messageStart)
 	// It wasn't that simple so we'll need a literal 
 	// symbol in the frame.
 	POTE oteSelector = InternSymbol(pattern);
-	//_ASSERTE(m_piVM->IsImmutable(reinterpret_cast<Oop>(oteSelector)));
 	TEXTRANGE errRange = TEXTRANGE(messageStart, argCount == 0 ? ThisTokenRange().m_stop : LastTokenRange().m_stop);
 	int symbolIndex=AddToFrame(reinterpret_cast<Oop>(oteSelector), errRange);
 	if (symbolIndex < 0)
@@ -3286,7 +3283,6 @@ void Compiler::VerifyTextMap(bool bFinal)
 	{
 		const TEXTMAP& textMap = m_textMaps[i];
 		int ip = textMap.ip;
-		const BYTECODE& bc = m_bytecodes[i];
 		AssertValidIpForTextMapEntry(ip, bFinal);
 	}
 }
