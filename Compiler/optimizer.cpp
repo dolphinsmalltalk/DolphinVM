@@ -1967,6 +1967,9 @@ POTE Compiler::NewMethod()
 		}
 		else
 			AddToFrameUnconditional(IntegerObjectOf(immediateWord), TEXTRANGE());
+		// We can save space by replacing the LongPushImmediate instruction with 2-byte argument with a single byte push const 0
+		m_bytecodes[0].byte = ShortPushConst;
+		RemoveBytes(1, 2);
 	}
 	else if (byte1 == ExLongPushImmediate && m_bytecodes[ExLongPushImmediateInstructionSize].byte == ReturnMessageStackTop)
 	{
@@ -1985,6 +1988,9 @@ POTE Compiler::NewMethod()
 		}
 		else
 			AddToFrameUnconditional(IntegerObjectOf(immediateValue), TEXTRANGE());
+		// We can save space by replacing the ExLongPushImmediate instruction with 4-byte argument with a single byte push const 0
+		m_bytecodes[0].byte = ShortPushConst;
+		RemoveBytes(1, ExLongPushImmediateInstructionSize-1);
 	}
 	else if (byte1 == PushChar && byte3 == ReturnMessageStackTop)
 	{
