@@ -1897,7 +1897,7 @@ POTE Compiler::NewMethod()
 		
 		// Convert to long form to simplify the interpreter's code to exec. this quick method.
 		byte2 = m_bytecodes[0].indexOfPushInstVar();
-		m_bytecodes[0].byte = byte1 = PushInstVar;
+		m_bytecodes[0].byte = PushInstVar;
 		m_codePointer = 1;
 		GenData(byte2);
 		m_codePointer++;
@@ -2045,6 +2045,9 @@ POTE Compiler::NewMethod()
 	POTE method = NewCompiledMethod(m_compiledMethodClass, GetCodeSize(), hdr);
 	STCompiledMethod& cmpldMethod = *(STCompiledMethod*)GetObj(method);
 	
+	// May have been changed above
+	byte1 = m_bytecodes[0].byte;
+
 	// Install bytecodes
 	if (!WantDebugMethod() //&& blockCount == 0
 		&& (GetCodeSize() < sizeof(MWORD) 
