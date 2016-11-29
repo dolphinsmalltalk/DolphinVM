@@ -37,6 +37,8 @@ static const UINT MAXTIMERRES = 60;
 static volatile UINT timerID;
 
 SemaphoreOTE* Interpreter::m_oteTimerSem;
+LONGLONG Interpreter::m_clockFrequency;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Smalltalk Alarm/Delay/Timers
@@ -132,8 +134,11 @@ BOOL __fastcall Interpreter::primitiveSignalAtTick(CompiledMethod&, unsigned arg
 		return primitiveFailureWith(PrimitiveFailureNonInteger, oteArg);	// ticks must be SmallInteger
 	}
 
+	// Clamp the requested delay to the maximum if it is too large. This simplifies the Delay code in the image a little.
 	if (nDelay > SMALLINTEGER(wTimerMax))
-		return primitiveFailureWithInt(PrimitiveFailureBadValue, nDelay);			// Too large
+	{
+		nDelay = wTimerMax;
+	}
 
 	// To avoid any race conditions against the global timerID value (it is quite
 	// common for the timer to fire, for example, before the timeSetEvent() call
@@ -224,18 +229,42 @@ BOOL __fastcall Interpreter::primitiveSignalAtTick(CompiledMethod&, unsigned arg
 	return primitiveSuccess();
 }
 
-#ifndef _M_IX86
 BOOL __fastcall Interpreter::primitiveMillisecondClockValue()
 {
-	return replaceStackTopObjectNoRefCnt(Integer::NewUnsigned32WithRef(timeGetTime()));
+	LONGLONG counter;
+	// Don't bother checking return value as according to the MSDN docs this won't fail on XP and later 
+	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&counter));
+
+	// Compiler can optimize this down to a single division operation that calculates both the quotient and remainder
+	LONGLONG seconds = counter / m_clockFrequency;
+	LONGLONG remainder = counter % m_clockFrequency;
+
+	LONGLONG millisecs = seconds * 1000 + (remainder * 1000 / m_clockFrequency);
+	return replaceStackTopWithNew(Integer::NewUnsigned64(millisecs));
 }
-#endif
+
+BOOL __fastcall Interpreter::primitiveMicrosecondClockValue()
+{
+	LONGLONG counter;
+	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&counter));
+
+	LONGLONG seconds = counter / m_clockFrequency;
+	LONGLONG remainder = counter % m_clockFrequency;
+	LONGLONG microsecs = seconds * 1000000 + (remainder * 1000000 / m_clockFrequency);
+	return replaceStackTopWithNew(Integer::NewUnsigned64(microsecs));
+}
 
 // Establish the desired timer resolution and create the Win32 event used to terminate
 // VM idling when a timer fires
 #pragma code_seg(INIT_SEG)
 HRESULT Interpreter::initializeTimer()
 {
+	if (::QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&m_clockFrequency)) == 0)
+	{
+		// MSDN says this shouldn't happen: "On systems that run Windows XP or later, the function will always succeed and will thus never return zero."
+		return ReportWin32Error(IDP_NOHIRESCLOCK, ::GetLastError());
+	}
+	
 	m_oteTimerSem = reinterpret_cast<SemaphoreOTE*>(Pointers.Nil);
 	timerID = 0;
 	TIMECAPS tc;
