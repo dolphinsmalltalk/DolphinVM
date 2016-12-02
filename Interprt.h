@@ -809,7 +809,7 @@ private:
 	static ProcessOTE* m_oteNewProcess;
 
 	static SemaphoreOTE* m_oteTimerSem;						// Timer Semaphore
-	static LONGLONG m_clockFrequency;
+	static uint64_t m_clockFrequency;
 
 	static OTE* m_oteUnderConstruction;				// Window currently under construction
 
