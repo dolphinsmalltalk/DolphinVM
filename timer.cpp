@@ -37,7 +37,7 @@ static const UINT MAXTIMERRES = 60;
 static volatile UINT timerID;
 
 SemaphoreOTE* Interpreter::m_oteTimerSem;
-LONGLONG Interpreter::m_clockFrequency;
+uint64_t Interpreter::m_clockFrequency;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -231,26 +231,32 @@ BOOL __fastcall Interpreter::primitiveSignalAtTick(CompiledMethod&, unsigned arg
 
 BOOL __fastcall Interpreter::primitiveMillisecondClockValue()
 {
-	LONGLONG counter;
+	// QPC is declared as returning (via out param) a signed value, but this makes no sense because
+	// the function boils down to a wrapper around the RDTSC instruction, which Intel's docs make
+	// clear provides an unsigned 64-bit counter.
+	// Treating the value as unsigned allows for more efficient division operations, and of course
+	// we never want a negative value for this counter (even if we'd have turned to stone long before)
+
+	uint64_t counter;
 	// Don't bother checking return value as according to the MSDN docs this won't fail on XP and later 
 	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&counter));
 
 	// Compiler can optimize this down to a single division operation that calculates both the quotient and remainder
-	LONGLONG seconds = counter / m_clockFrequency;
-	LONGLONG remainder = counter % m_clockFrequency;
+	uint64_t seconds = counter / m_clockFrequency;
+	uint64_t remainder = counter % m_clockFrequency;
 
-	LONGLONG millisecs = seconds * 1000 + (remainder * 1000 / m_clockFrequency);
+	uint64_t millisecs = seconds * 1000 + (remainder * 1000 / m_clockFrequency);
 	return replaceStackTopWithNew(Integer::NewUnsigned64(millisecs));
 }
 
 BOOL __fastcall Interpreter::primitiveMicrosecondClockValue()
 {
-	LONGLONG counter;
+	uint64_t counter;
 	::QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&counter));
 
-	LONGLONG seconds = counter / m_clockFrequency;
-	LONGLONG remainder = counter % m_clockFrequency;
-	LONGLONG microsecs = seconds * 1000000 + (remainder * 1000000 / m_clockFrequency);
+	uint64_t seconds = counter / m_clockFrequency;
+	uint64_t remainder = counter % m_clockFrequency;
+	uint64_t microsecs = seconds * 1000000 + (remainder * 1000000 / m_clockFrequency);
 	return replaceStackTopWithNew(Integer::NewUnsigned64(microsecs));
 }
 
