@@ -2967,6 +2967,7 @@ POTE Compiler::ParseByteArray()
 	//
 	int maxelemcount=128; // A convenient start size though we can expand beyond this if necessary
 	BYTE* elems=static_cast<BYTE*>(malloc(maxelemcount*sizeof(BYTE)));
+	BYTE* elemstemp=static_cast<BYTE*>(malloc(maxelemcount*sizeof(BYTE)));
 	int elemcount=0;
 
 	int start = ThisTokenRange().m_start;
@@ -2978,7 +2979,12 @@ POTE Compiler::ParseByteArray()
 		{
 			_ASSERTE(maxelemcount > 0);
 			maxelemcount *= 2;
-			elems = (BYTE*)realloc(elems, maxelemcount*sizeof(BYTE));
+			//when realloc() fails in allocating memory, original pointer 'elems' is lost. 
+			// assigning realloc() to a temporary pointer.
+			elemstemp = (BYTE*)realloc(elems, maxelemcount*sizeof(BYTE));
+			if (elemstemp != NULL) {
+				elems = elemstemp;
+			}
 		}
 		
 		switch(ThisToken()) 
