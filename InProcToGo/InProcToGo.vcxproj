@@ -225,6 +225,7 @@
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
