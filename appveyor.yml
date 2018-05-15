@@ -10,8 +10,13 @@ configuration:
 build:
   project: DolphinVM.sln
   verbosity: minimal
-test_script:
-- cmd: AppVeyorTestDolphinVM
+for:
+-
+  matrix:
+    only:
+      - configuration: Release
+  test_script:
+  - cmd: AppVeyorTestDolphinVM
 artifacts:
 - path: Dolphin\dpro.*
   name: DPro
