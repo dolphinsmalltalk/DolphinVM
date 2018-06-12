@@ -233,26 +233,15 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SHA.C">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;DOLPHINSURECRYPTO_EXPORTS;INC_CHILD</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='VM Debug|Win32'">NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;DOLPHINSURECRYPTO_EXPORTS;INC_CHILD</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;DOLPHINSURECRYPTO_EXPORTS;INC_CHILD</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="Utils.c">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;DOLPHINSURECRYPTO_EXPORTS;INC_CHILD</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='VM Debug|Win32'">NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;DOLPHINSURECRYPTO_EXPORTS;INC_CHILD</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;DOLPHINSURECRYPTO_EXPORTS;INC_CHILD</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="SHA.h" />
-    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DolphinSureCrypto.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SHA.cpp" />
+    <ClCompile Include="SHAExport.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
