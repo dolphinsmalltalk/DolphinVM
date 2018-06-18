@@ -1,5 +1,7 @@
 # DolphinVM
 
+# Please note: This repository is now obsolete. It has been merged into the main Dolphin repository for Dolphin 7.1. 
+
 [![Build status](https://ci.appveyor.com/api/projects/status/6ru55e8y9huog899/branch/master?svg=true)](https://ci.appveyor.com/project/dolphinsmalltalk/dolphinvm-nf68c/branch/master)
 
 The [Dolphin Smalltalk](http://object-arts.com/) virtual machine. 
@@ -14,7 +16,7 @@ Note: if you are just looking to install Dolphin and get going as quickly as pos
 
 * _Versions prior to 7.1:_ You should clone this repository (DolphinVM) into a `DolphinVM\` subdirectory of `\Dolphin\Core\`. The same comment applies regarding the need to fork this repo if you want to be able to contribute changes.
 
-* _Version 7.1 and later:_ The Dolphin repository includes this repository as a submodule synchronised to the correct version. Depending on your git client and how you cloned the repository you  may need to run ``git submodule update --init`` to clone the VM.
+* _Version 7.1 and later:_ This repository has been merged into the main Dolphin repository and can be found in the `Core\DolphinVM` folder. The history has been retained. No further changes will be accepted to the DolphinVM via this repo for versions of Dolphin from 7.1. If you wish to contribute, please make and commit your VM changes in the main Dolphin repos and submit a PR there.
 
 * Install VS2017 Community Edition on your machine with the "Desktop development with C++" workload. You can use the Pro or Enterprise edition if you have it. It is possible to compile the VM with VS2015, but you will need to downgrade the solution to the v140 toolset and either retarget to the ealier Windows SDK that shipped with VS2015, or install the latest SDK standalone. Later VS versions (when they appear) may work too but we no longer support VS2013, sorry. The Dolphin VM is a set of C++ projects so make sure to install this option (it's not the default) or you'll end up only being able to compile C#.
 
