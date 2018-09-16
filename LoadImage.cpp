@@ -285,6 +285,15 @@ template <MWORD ImageNullTerms> HRESULT ObjectMemory::LoadObjects(ibinstream & i
 				cbRead += sizeof(MWORD);
 
 				pBody = reinterpret_cast<Object*>(AllocateVirtualSpace(dwMaxAlloc, byteSize));
+				if (!pBody)
+				{
+					// Insufficient virtual memory. There is unlikely to be sufficient memory available to display a 
+					// normal message box either
+					char szMsg[256];
+					::LoadString(GetResLibHandle(), IDP_OUTOFVIRTUALMEMORY, szMsg, sizeof(szMsg) - 1);
+					DolphinFatalExit(STATUS_NO_MEMORY, szMsg);
+				}
+
 				ote->m_location = pBody;
 #ifdef OAD
 				TRACESTREAM << "Allocated virtual space at " << ote->m_location

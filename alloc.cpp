@@ -111,6 +111,8 @@ PointersOTE* __fastcall ObjectMemory::shallowCopy(PointersOTE* ote)
 		VirtualOTE* virtualCopy = ObjectMemory::newVirtualObject(classPointer,
 			currentTotalByteSize / sizeof(MWORD),
 			maxByteSize / sizeof(MWORD));
+		if (!virtualCopy)
+			return nullptr;
 
 		pVObj = virtualCopy->m_location;
 		pBase = pVObj->getHeader();
@@ -503,11 +505,18 @@ Oop* __fastcall Interpreter::primitiveNewVirtual(Oop* const sp)
 			if (instSpec.m_indexable && !instSpec.m_nonInstantiable)
 			{
 				unsigned fixedFields = instSpec.m_fixedFields;
-				VirtualOTE* newObject = ObjectMemory::newVirtualObject(receiverClass, initialSize + fixedFields, maxSize + fixedFields);
-				*(sp - 2) = reinterpret_cast<Oop>(newObject);
-				// No point saving down SP before potential Zct reconcile as the init & max args must be SmallIntegers
-				ObjectMemory::AddToZct((OTE*)newObject);
-				return sp - 2;
+				VirtualOTE* newObject = ObjectMemory::newVirtualObject(receiverClass, initialSize + fixedFields, maxSize);
+				if (newObject)
+				{
+					*(sp - 2) = reinterpret_cast<Oop>(newObject);
+					// No point saving down SP before potential Zct reconcile as the init & max args must be SmallIntegers
+					ObjectMemory::AddToZct((OTE*)newObject);
+					return sp - 2;
+				}
+				else
+				{
+					return primitiveFailure(4); // OOM
+				}
 			}
 			else
 			{
@@ -535,52 +544,55 @@ MWORD* __stdcall AllocateVirtualSpace(MWORD maxBytes, MWORD initialBytes)
 {
 	unsigned reserveBytes = _ROUND2(maxBytes + dwPageSize, dwAllocationGranularity);
 	ASSERT(reserveBytes % dwAllocationGranularity == 0);
-	VirtualObjectHeader* pLocation;
-	
-	pLocation = static_cast<VirtualObjectHeader*>(::VirtualAlloc(NULL, reserveBytes, MEM_RESERVE, PAGE_NOACCESS));
-	if (!pLocation)
-		// This is continuable
-		::RaiseException(STATUS_NO_MEMORY, 0, 0, NULL);
-
-	#ifdef _DEBUG
+	VirtualObjectHeader* pReserved = static_cast<VirtualObjectHeader*>(::VirtualAlloc(NULL, reserveBytes, MEM_RESERVE, PAGE_NOACCESS));
+	if (pReserved)
+	{
+#ifdef _DEBUG
 		// Let's see whether we got the rounding correct!
 		MEMORY_BASIC_INFORMATION mbi;
-		VERIFY(::VirtualQuery(pLocation, &mbi, sizeof(mbi)) == sizeof(mbi));
-		ASSERT(mbi.AllocationBase == pLocation);
-		ASSERT(mbi.BaseAddress == pLocation);
-	ASSERT(mbi.AllocationProtect == PAGE_NOACCESS);
-	//	ASSERT(mbi.Protect == PAGE_NOACCESS);
+		VERIFY(::VirtualQuery(pReserved, &mbi, sizeof(mbi)) == sizeof(mbi));
+		ASSERT(mbi.AllocationBase == pReserved);
+		ASSERT(mbi.BaseAddress == pReserved);
+		ASSERT(mbi.AllocationProtect == PAGE_NOACCESS);
+		//	ASSERT(mbi.Protect == PAGE_NOACCESS);
 		ASSERT(mbi.RegionSize == reserveBytes);
 		ASSERT(mbi.State == MEM_RESERVE);
 		ASSERT(mbi.Type == MEM_PRIVATE);
-	#endif
+#endif
 
-	// We expect the initial byte size to be a integral number of pages, and it must also take account
-	// of the virtual allocation overhead (currently 4 bytes)
-	initialBytes = _ROUND2(initialBytes + sizeof(VirtualObjectHeader), dwPageSize);
-	ASSERT(initialBytes % dwPageSize == 0);
+		// We expect the initial byte size to be a integral number of pages, and it must also take account
+		// of the virtual allocation overhead (currently 4 bytes)
+		initialBytes = _ROUND2(initialBytes + sizeof(VirtualObjectHeader), dwPageSize);
+		ASSERT(initialBytes % dwPageSize == 0);
 
-	// Note that VirtualAlloc initializes the committed memory to zeroes.
-	pLocation = static_cast<VirtualObjectHeader*>(::VirtualAlloc(pLocation, initialBytes, MEM_COMMIT, PAGE_READWRITE));
-	if (!pLocation)
-		// This is also continuable
-		::RaiseException(STATUS_NO_MEMORY, 0, 0, NULL);
+		// Note that VirtualAlloc initializes the committed memory to zeroes.
+		VirtualObjectHeader* pLocation = static_cast<VirtualObjectHeader*>(::VirtualAlloc(pReserved, initialBytes, MEM_COMMIT, PAGE_READWRITE));
+		if (pLocation)
+		{
+#ifdef _DEBUG
+			// Let's see whether we got the rounding correct!
+			VERIFY(::VirtualQuery(pLocation, &mbi, sizeof(mbi)) == sizeof(mbi));
+			ASSERT(mbi.AllocationBase == pLocation);
+			ASSERT(mbi.BaseAddress == pLocation);
+			ASSERT(mbi.AllocationProtect == PAGE_NOACCESS);
+			ASSERT(mbi.Protect == PAGE_READWRITE);
+			ASSERT(mbi.RegionSize == initialBytes);
+			ASSERT(mbi.State == MEM_COMMIT);
+			ASSERT(mbi.Type == MEM_PRIVATE);
+#endif
 
-	#ifdef _DEBUG
-		// Let's see whether we got the rounding correct!
-		VERIFY(::VirtualQuery(pLocation, &mbi, sizeof(mbi)) == sizeof(mbi));
-		ASSERT(mbi.AllocationBase == pLocation);
-		ASSERT(mbi.BaseAddress == pLocation);
-		ASSERT(mbi.AllocationProtect == PAGE_NOACCESS);
-		ASSERT(mbi.Protect == PAGE_READWRITE);
-		ASSERT(mbi.RegionSize == initialBytes);
-		ASSERT(mbi.State == MEM_COMMIT);
-		ASSERT(mbi.Type == MEM_PRIVATE);
-	#endif
+			// Use first slot to hold the maximum size for the object
+			pLocation->setMaxAllocation(maxBytes);
+			return reinterpret_cast<MWORD*>(pLocation + 1);
+		}
+		else
+		{
+			// Free the reserved space as there was insufficient memory available to commit the initial pages
+			::VirtualFree(pReserved, 0, MEM_RELEASE);
+		}
+	}
 
-	// Use first slot to hold the maximum size for the object
-	pLocation->setMaxAllocation(maxBytes);
-	return reinterpret_cast<MWORD*>(pLocation+1);
+	return nullptr;
 }
 
 // N.B. Like the other instantiate methods in ObjectMemory, this method for instantiating
@@ -614,33 +626,38 @@ VirtualOTE* ObjectMemory::newVirtualObject(BehaviorOTE* classPointer, MWORD init
 
 	unsigned byteSize = initialSize*sizeof(MWORD);
 	VariantObject* pLocation = reinterpret_cast<VariantObject*>(AllocateVirtualSpace(maxSize * sizeof(MWORD), byteSize));
+	if (pLocation)
+	{
 
-	// No need to alter ref. count of process class, as it is sticky
+		// No need to alter ref. count of process class, as it is sticky
 
-	// Fill space with nils for initial values
-	const Oop nil = Oop(Pointers.Nil);
-	
+		// Fill space with nils for initial values
+		const Oop nil = Oop(Pointers.Nil);
+
 #ifdef _M_IX86
-	__stosd(reinterpret_cast<DWORD*>(pLocation->m_fields), nil, initialSize);
+		__stosd(reinterpret_cast<DWORD*>(pLocation->m_fields), nil, initialSize);
 #else
-	const unsigned loopEnd = initialSize;
-	for (unsigned i = 0; i< loopEnd; i++)
-		pLocation->m_fields[i] = nil;
+		const unsigned loopEnd = initialSize;
+		for (unsigned i = 0; i < loopEnd; i++)
+			pLocation->m_fields[i] = nil;
 #endif
 
-	// All of the above doesn't touch any shared static member vars
-//	EnterCritSection();
+		// All of the above doesn't touch any shared static member vars
+	//	EnterCritSection();
 
-	OTE* ote = ObjectMemory::allocateOop(static_cast<POBJECT>(pLocation));
-	ote->setSize(byteSize);
-	ote->m_oteClass = classPointer;
-	classPointer->countUp();
-	ote->m_flags = m_spaceOTEBits[OTEFlags::VirtualSpace];
-	ASSERT(ote->isPointers());
+		OTE* ote = ObjectMemory::allocateOop(static_cast<POBJECT>(pLocation));
+		ote->setSize(byteSize);
+		ote->m_oteClass = classPointer;
+		classPointer->countUp();
+		ote->m_flags = m_spaceOTEBits[OTEFlags::VirtualSpace];
+		ASSERT(ote->isPointers());
 
-//	ExitCritSection();
+		//	ExitCritSection();
 
-	return reinterpret_cast<VirtualOTE*>(ote);
+		return reinterpret_cast<VirtualOTE*>(ote);
+	}
+	
+	return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
